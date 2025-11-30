@@ -1,0 +1,75 @@
+import { useState } from "react";
+import { Link } from "react-router-dom";
+import { Menu, X, Search } from "lucide-react";
+
+const navItems = [
+  { label: "Startseite", href: "/" },
+  { label: "Rezepte", href: "/rezepte" },
+  { label: "Kategorien", href: "/kategorien" },
+  { label: "Über mich", href: "/ueber-mich" },
+];
+
+const Header = () => {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  return (
+    <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border">
+      <div className="container mx-auto">
+        <div className="flex items-center justify-between h-20">
+          {/* Logo */}
+          <Link to="/" className="flex items-center gap-2">
+            <span className="font-display text-2xl md:text-3xl font-semibold text-primary">
+              cook<span className="text-sage-green">it</span>simple
+            </span>
+          </Link>
+
+          {/* Desktop Navigation */}
+          <nav className="hidden md:flex items-center gap-8">
+            {navItems.map((item) => (
+              <Link
+                key={item.href}
+                to={item.href}
+                className="nav-link font-medium text-sm uppercase tracking-wider"
+              >
+                {item.label}
+              </Link>
+            ))}
+          </nav>
+
+          {/* Search & Mobile Menu */}
+          <div className="flex items-center gap-4">
+            <button className="p-2 text-foreground/70 hover:text-primary transition-colors">
+              <Search className="w-5 h-5" />
+            </button>
+            <button
+              className="md:hidden p-2 text-foreground/70 hover:text-primary transition-colors"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            >
+              {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            </button>
+          </div>
+        </div>
+
+        {/* Mobile Navigation */}
+        {mobileMenuOpen && (
+          <nav className="md:hidden py-6 border-t border-border animate-fade-in">
+            <div className="flex flex-col gap-4">
+              {navItems.map((item) => (
+                <Link
+                  key={item.href}
+                  to={item.href}
+                  className="font-medium text-foreground/80 hover:text-primary transition-colors py-2"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  {item.label}
+                </Link>
+              ))}
+            </div>
+          </nav>
+        )}
+      </div>
+    </header>
+  );
+};
+
+export default Header;
