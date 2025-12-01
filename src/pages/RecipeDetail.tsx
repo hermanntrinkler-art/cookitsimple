@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { supabase } from "@/integrations/supabase/client";
-import { Clock, Users, ChefHat, ArrowLeft, Printer, Share2 } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { Clock, Users, ChefHat, ArrowLeft, Printer, Share2, Trash2 } from "lucide-react";
 import RecipeCard from "@/components/RecipeCard";
+import { toast } from "sonner";
 
 interface Recipe {
   id: string;
@@ -42,9 +44,24 @@ const categoryMap: Record<string, string> = {
 
 const RecipeDetail = () => {
   const { slug } = useParams<{ slug: string }>();
+  const navigate = useNavigate();
+  const { isAdmin } = useAuth();
   const [recipe, setRecipe] = useState<Recipe | null>(null);
   const [relatedRecipes, setRelatedRecipes] = useState<RelatedRecipe[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const handleDelete = async () => {
+    if (!recipe) return;
+    if (!confirm(`Möchtest du "${recipe.title}" wirklich löschen?`)) return;
+
+    const { error } = await supabase.from("recipes").delete().eq("id", recipe.id);
+    if (error) {
+      toast.error("Fehler beim Löschen");
+    } else {
+      toast.success("Rezept gelöscht");
+      navigate("/rezepte");
+    }
+  };
 
   useEffect(() => {
     const fetchRecipe = async () => {
@@ -176,6 +193,15 @@ const RecipeDetail = () => {
                   <Share2 className="w-4 h-4" />
                   Teilen
                 </button>
+                {isAdmin && (
+                  <button 
+                    onClick={handleDelete}
+                    className="flex items-center gap-2 px-4 py-2 border border-destructive text-destructive rounded-md text-sm font-medium hover:bg-destructive hover:text-destructive-foreground transition-colors"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                    Löschen
+                  </button>
+                )}
               </div>
             </div>
 
