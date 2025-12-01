@@ -230,8 +230,13 @@ function convertRecipeSchema(source: any) {
   // Generate slug from title
   const slug = generateSlug(source.title);
 
-  // Map difficulty (should already be text)
-  const difficulty = source.difficulty || 'mittel';
+  // Map difficulty from English to German
+  const difficultyMap: Record<string, string> = {
+    'easy': 'Einfach',
+    'medium': 'Mittel',
+    'hard': 'Anspruchsvoll',
+  };
+  const difficulty = difficultyMap[source.difficulty?.toLowerCase()] || 'Mittel';
 
   // Map category
   const category = source.category || 'Hauptgerichte';
