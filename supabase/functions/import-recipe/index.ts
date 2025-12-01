@@ -209,19 +209,37 @@ serve(async (req) => {
 });
 
 function convertRecipeSchema(source: any) {
-  // Convert ingredients from [{name, amount, unit}] to ["500g Mehl", ...]
-  const ingredients = (source.ingredients || []).map((ing: any) => {
-    const parts = [];
-    if (ing.amount) parts.push(ing.amount);
-    if (ing.unit) parts.push(ing.unit);
-    if (ing.name) parts.push(ing.name);
-    return parts.join(' ').trim() || ing.name || '';
-  }).filter((i: string) => i);
+  // Convert ingredients - try array first, then fallback to text
+  let ingredients: string[] = [];
+  if (source.ingredients && source.ingredients.length > 0) {
+    ingredients = source.ingredients.map((ing: any) => {
+      const parts = [];
+      if (ing.amount) parts.push(ing.amount);
+      if (ing.unit) parts.push(ing.unit);
+      if (ing.name) parts.push(ing.name);
+      return parts.join(' ').trim() || ing.name || '';
+    }).filter((i: string) => i);
+  } else if (source.ingredients_text) {
+    // Parse from text - split by newlines
+    ingredients = source.ingredients_text
+      .split('\n')
+      .map((line: string) => line.trim())
+      .filter((line: string) => line.length > 0);
+  }
 
-  // Convert steps from [{step: "Text"}] to ["Text", ...]
-  const instructions = (source.steps || []).map((s: any) => 
-    typeof s === 'string' ? s : (s.step || s.text || '')
-  ).filter((s: string) => s);
+  // Convert instructions - try array first, then fallback to text
+  let instructions: string[] = [];
+  if (source.steps && source.steps.length > 0) {
+    instructions = source.steps.map((s: any) => 
+      typeof s === 'string' ? s : (s.step || s.text || '')
+    ).filter((s: string) => s);
+  } else if (source.instructions_text) {
+    // Parse from text - split by newlines
+    instructions = source.instructions_text
+      .split('\n')
+      .map((line: string) => line.trim())
+      .filter((line: string) => line.length > 0);
+  }
 
   // Calculate total time
   const totalMinutes = (source.work_minutes || 0) + (source.cook_minutes || 0) + (source.rest_minutes || 0);
