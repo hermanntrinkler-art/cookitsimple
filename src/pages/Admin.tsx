@@ -5,7 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Edit, Trash2, Eye, LogOut, Home } from "lucide-react";
+import { Plus, Edit, Trash2, Eye, LogOut, Home, Download } from "lucide-react";
 import { toast } from "sonner";
 
 interface Recipe {
@@ -130,12 +130,20 @@ export default function Admin() {
       <main className="container mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-serif">Rezepte verwalten</h1>
-          <Button asChild>
-            <Link to="/admin/rezept/neu">
-              <Plus className="w-4 h-4 mr-2" />
-              Neues Rezept
-            </Link>
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" asChild>
+              <Link to="/admin/import">
+                <Download className="w-4 h-4 mr-2" />
+                Import-Einstellungen
+              </Link>
+            </Button>
+            <Button asChild>
+              <Link to="/admin/rezept/neu">
+                <Plus className="w-4 h-4 mr-2" />
+                Neues Rezept
+              </Link>
+            </Button>
+          </div>
         </div>
 
         {loadingRecipes ? (

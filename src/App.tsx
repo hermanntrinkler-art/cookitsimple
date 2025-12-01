@@ -12,6 +12,7 @@ import UeberMich from "./pages/UeberMich";
 import Auth from "./pages/Auth";
 import Admin from "./pages/Admin";
 import AdminRecipeForm from "./pages/AdminRecipeForm";
+import AdminImportSettings from "./pages/AdminImportSettings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -32,6 +33,7 @@ const App = () => (
             <Route path="/auth" element={<Auth />} />
             <Route path="/admin" element={<Admin />} />
             <Route path="/admin/rezept/:id" element={<AdminRecipeForm />} />
+            <Route path="/admin/import" element={<AdminImportSettings />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
