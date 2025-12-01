@@ -14,6 +14,74 @@ export type Database = {
   }
   public: {
     Tables: {
+      import_settings: {
+        Row: {
+          created_at: string
+          enabled: boolean
+          frequency: string
+          id: string
+          import_hour: number
+          last_import_at: string | null
+          next_import_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          enabled?: boolean
+          frequency?: string
+          id?: string
+          import_hour?: number
+          last_import_at?: string | null
+          next_import_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          enabled?: boolean
+          frequency?: string
+          id?: string
+          import_hour?: number
+          last_import_at?: string | null
+          next_import_at?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      imported_recipes: {
+        Row: {
+          id: string
+          imported_at: string
+          local_recipe_id: string | null
+          raw_data: Json | null
+          source_project: string
+          source_recipe_id: string
+        }
+        Insert: {
+          id?: string
+          imported_at?: string
+          local_recipe_id?: string | null
+          raw_data?: Json | null
+          source_project?: string
+          source_recipe_id: string
+        }
+        Update: {
+          id?: string
+          imported_at?: string
+          local_recipe_id?: string | null
+          raw_data?: Json | null
+          source_project?: string
+          source_recipe_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "imported_recipes_local_recipe_id_fkey"
+            columns: ["local_recipe_id"]
+            isOneToOne: false
+            referencedRelation: "recipes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       recipes: {
         Row: {
           author_id: string | null
