@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Menu, X, Search, User } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import logo from "@/assets/logo.png";
 
 const navItems = [
   { label: "Startseite", href: "/" },
@@ -19,10 +20,12 @@ const Header = () => {
       <div className="container mx-auto">
         <div className="flex items-center justify-between h-20">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2">
-            <span className="font-display text-2xl md:text-3xl font-semibold text-primary">
-              cook<span className="text-sage-green">it</span>simple
-            </span>
+          <Link to="/" className="flex items-center">
+            <img 
+              src={logo} 
+              alt="cookitsimple Logo" 
+              className="h-12 md:h-14 w-auto"
+            />
           </Link>
 
           {/* Desktop Navigation */}
