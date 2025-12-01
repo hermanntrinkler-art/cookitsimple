@@ -1,9 +1,56 @@
+import { useState, useEffect } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import RecipeCard from "@/components/RecipeCard";
-import { recipes } from "@/data/recipes";
+import { supabase } from "@/integrations/supabase/client";
+
+interface Recipe {
+  id: string;
+  title: string;
+  slug: string;
+  category: string;
+  time: string;
+  servings: number;
+  image_url: string | null;
+}
+
+const categoryMap: Record<string, string> = {
+  'hauptgerichte': 'Hauptgerichte',
+  'dessert': 'Desserts',
+  'desserts': 'Desserts',
+  'vorspeisen': 'Vorspeisen',
+  'salate': 'Salate',
+  'suppen': 'Suppen',
+  'backen': 'Backen',
+};
 
 const Rezepte = () => {
+  const [recipes, setRecipes] = useState<Recipe[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchRecipes = async () => {
+      const { data, error } = await supabase
+        .from('recipes')
+        .select('id, title, slug, category, time, servings, image_url')
+        .eq('published', true)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching recipes:', error);
+      } else {
+        setRecipes(data || []);
+      }
+      setLoading(false);
+    };
+
+    fetchRecipes();
+  }, []);
+
+  const getDisplayCategory = (category: string) => {
+    return categoryMap[category.toLowerCase()] || category;
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
@@ -25,24 +72,30 @@ const Rezepte = () => {
         {/* Recipe Grid */}
         <section className="py-16">
           <div className="container mx-auto">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-              {recipes.map((recipe, index) => (
-                <div 
-                  key={recipe.id}
-                  className="animate-fade-in-up"
-                  style={{ animationDelay: `${index * 0.05}s` }}
-                >
-                  <RecipeCard
-                    title={recipe.title}
-                    image={recipe.image}
-                    category={recipe.category}
-                    time={recipe.time}
-                    servings={recipe.servings}
-                    slug={recipe.slug}
-                  />
-                </div>
-              ))}
-            </div>
+            {loading ? (
+              <div className="text-center text-muted-foreground">Lade Rezepte...</div>
+            ) : recipes.length === 0 ? (
+              <div className="text-center text-muted-foreground">Noch keine Rezepte vorhanden.</div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                {recipes.map((recipe, index) => (
+                  <div 
+                    key={recipe.id}
+                    className="animate-fade-in-up"
+                    style={{ animationDelay: `${index * 0.05}s` }}
+                  >
+                    <RecipeCard
+                      title={recipe.title}
+                      image={recipe.image_url || '/placeholder.svg'}
+                      category={getDisplayCategory(recipe.category)}
+                      time={recipe.time}
+                      servings={recipe.servings}
+                      slug={recipe.slug}
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </section>
       </main>
