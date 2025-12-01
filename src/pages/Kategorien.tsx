@@ -1,23 +1,69 @@
+import { useState, useEffect } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import RecipeCard from "@/components/RecipeCard";
-import { recipes } from "@/data/recipes";
-import { Utensils, Cake, Leaf, Timer } from "lucide-react";
-import { useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { Utensils, Cake, Leaf } from "lucide-react";
+
+interface Recipe {
+  id: string;
+  title: string;
+  slug: string;
+  category: string;
+  time: string;
+  servings: number;
+  image_url: string | null;
+}
+
+const categoryMap: Record<string, string> = {
+  'hauptgerichte': 'Hauptgerichte',
+  'dessert': 'Desserts',
+  'desserts': 'Desserts',
+  'vorspeisen': 'Vorspeisen',
+  'salate': 'Salate',
+  'suppen': 'Suppen',
+  'backen': 'Backen',
+  'leichte küche': 'Leichte Küche',
+};
 
 const categories = [
   { id: "alle", label: "Alle Rezepte", icon: null },
-  { id: "Hauptgerichte", label: "Hauptgerichte", icon: Utensils },
-  { id: "Desserts", label: "Desserts", icon: Cake },
-  { id: "Leichte Küche", label: "Leichte Küche", icon: Leaf },
+  { id: "hauptgerichte", label: "Hauptgerichte", icon: Utensils },
+  { id: "dessert", label: "Desserts", icon: Cake },
+  { id: "leichte küche", label: "Leichte Küche", icon: Leaf },
 ];
 
 const Kategorien = () => {
   const [activeCategory, setActiveCategory] = useState("alle");
+  const [recipes, setRecipes] = useState<Recipe[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchRecipes = async () => {
+      const { data, error } = await supabase
+        .from('recipes')
+        .select('id, title, slug, category, time, servings, image_url')
+        .eq('published', true)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching recipes:', error);
+      } else {
+        setRecipes(data || []);
+      }
+      setLoading(false);
+    };
+
+    fetchRecipes();
+  }, []);
 
   const filteredRecipes = activeCategory === "alle" 
     ? recipes 
-    : recipes.filter(r => r.category === activeCategory);
+    : recipes.filter(r => r.category.toLowerCase() === activeCategory.toLowerCase());
+
+  const getDisplayCategory = (category: string) => {
+    return categoryMap[category.toLowerCase()] || category;
+  };
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -62,27 +108,33 @@ const Kategorien = () => {
         {/* Recipe Grid */}
         <section className="py-16">
           <div className="container mx-auto">
-            <p className="text-muted-foreground mb-8">
-              {filteredRecipes.length} {filteredRecipes.length === 1 ? "Rezept" : "Rezepte"} gefunden
-            </p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-              {filteredRecipes.map((recipe, index) => (
-                <div 
-                  key={recipe.id}
-                  className="animate-fade-in-up"
-                  style={{ animationDelay: `${index * 0.05}s` }}
-                >
-                  <RecipeCard
-                    title={recipe.title}
-                    image={recipe.image}
-                    category={recipe.category}
-                    time={recipe.time}
-                    servings={recipe.servings}
-                    slug={recipe.slug}
-                  />
+            {loading ? (
+              <div className="text-center text-muted-foreground">Lade Rezepte...</div>
+            ) : (
+              <>
+                <p className="text-muted-foreground mb-8">
+                  {filteredRecipes.length} {filteredRecipes.length === 1 ? "Rezept" : "Rezepte"} gefunden
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                  {filteredRecipes.map((recipe, index) => (
+                    <div 
+                      key={recipe.id}
+                      className="animate-fade-in-up"
+                      style={{ animationDelay: `${index * 0.05}s` }}
+                    >
+                      <RecipeCard
+                        title={recipe.title}
+                        image={recipe.image_url || '/placeholder.svg'}
+                        category={getDisplayCategory(recipe.category)}
+                        time={recipe.time}
+                        servings={recipe.servings}
+                        slug={recipe.slug}
+                      />
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
+              </>
+            )}
           </div>
         </section>
       </main>
