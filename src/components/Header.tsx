@@ -24,7 +24,7 @@ const Header = () => {
             <img 
               src={logo} 
               alt="cookitsimple Logo" 
-              className="h-16 md:h-20 w-auto"
+              className="h-40 md:h-48 w-auto"
             />
           </Link>
 
